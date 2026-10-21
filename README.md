@@ -8,7 +8,7 @@ Within the ASTROX ecosystem, this service operates as **Backend 2 (The Vision En
 
 ## 1. System Integration & Architecture
 
-The Vision Microservice decouples compute-intensive neural network inference from standard application business logic and uses a **decoupled dual-transport streaming pipeline** to achieve sub-second live video latency:
+The Vision Microservice decouples compute-intensive network inference from standard application business logic and uses a **decoupled dual-transport streaming pipeline** to achieve sub-second live video latency:
 
 ```mermaid
 flowchart TD
