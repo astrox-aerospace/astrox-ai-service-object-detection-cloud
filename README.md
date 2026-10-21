@@ -2,7 +2,7 @@
 
 FastAPI inference microservice and real-time computer vision subsystem for the **ASTROX UAV Platform**. It executes YOLO neural models—optimized with NVIDIA TensorRT on edge hardware—for single-frame detection, batch video processing, ByteTrack multi-target tracking, live multi-camera ingestion, WebRTC streaming, and system telemetry.
 
-Within the ASTROX ecosystem, this service operates as **Backend 2 (The Vision Engine)**, providing hardware-accelerated computer vision to the upstream [**Drone-Object-Detection-Website-cloud**](https://github.com/Mahavidyajp/Drone-Object-Detection-Website-cloud.git) application layer and orchestrated via [**astrox-object-detection-cloud**](astrox-ai-service-object-detection-cloud.git).
+Within the ASTROX ecosystem, this service operates as **Backend 2 (The Vision Engine)**, providing hardware-accelerated computer vision to the upstream [**Drone-Object-Detection-Website-cloud**](https://github.com/maha-vidya/Drone-Object-Detection-Website-cloud.git) application layer and orchestrated via [**astrox-object-detection-cloud**](astrox-ai-service-object-detection-cloud.git).
 
 ---
 
