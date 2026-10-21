@@ -2,7 +2,7 @@
 
 FastAPI inference microservice and real-time computer vision subsystem for the **ASTROX UAV Platform**. It executes YOLO neural models—optimized with NVIDIA TensorRT on edge hardware—for single-frame detection, batch video processing, ByteTrack multi-target tracking, live multi-camera ingestion, WebRTC streaming, and system telemetry.
 
-Within the ASTROX ecosystem, this service operates as **Backend 2 (The Vision Engine)**, providing hardware-accelerated computer vision to the upstream [**Drone-Object-Detection-Website-cloud**](https://github.com/maha-vidya/Drone-Object-Detection-Website-cloud.git) application layer and orchestrated via [**astrox-object-detection-cloud**](https://github.com/maha-vidya/astrox-object-detection-cloud.git).
+Within the ASTROX 2-repository ecosystem, this service operates as **The Vision & Inference Engine**, providing hardware-accelerated computer vision and real-time streaming to the upstream [**Drone-Object-Detection-Website-cloud**](https://github.com/maha-vidya/Drone-Object-Detection-Website-cloud.git) platform.
 
 ---
 
@@ -70,12 +70,14 @@ flowchart TD
 
 ---
 
-## 2. Related System Repositories
+## 2. System Architecture & Repositories
+
+The complete ASTROX platform is streamlined into 2 decoupled repositories:
 
 | Repository | Primary Stack | Architecture Role | Description |
 | :--- | :--- | :--- | :--- |
-| [**Drone-Object-Detection-Website-cloud**](https://github.com/maha-vidya/Drone-Object-Detection-Website-cloud.git) | React 19, Node.js, Express, MongoDB | Application Layer | Central gateway handling user authentication, telemetry history, and the operator dashboard. |
-| [**astrox-object-detection-cloud**](https://github.com/maha-vidya/astrox-object-detection-cloud.git) | Docker, Docker Compose, Nginx | Orchestration Hub | Unified cloud deployment templates, reverse proxy definitions, and multi-service networking. |
+| [**Drone-Object-Detection-Website-cloud**](https://github.com/maha-vidya/Drone-Object-Detection-Website-cloud.git) | React 19, Node.js, Express, MongoDB, Docker | Application & Cloud Gateway | Central operator console, authentication, mission logs, and cloud deployment orchestration (`deploy/`). |
+| [**astrox-ai-service-object-detection-cloud**](https://github.com/maha-vidya/astrox-ai-service-object-detection-cloud.git) | Python 3.10, FastAPI, YOLO, ByteTrack, WebRTC | Perception & Inference Microservice *(This Repo)* | Low-latency vision engine executing YOLO object detection, ByteTrack tracking, RTSP ingestion, and WebRTC streaming. |
 
 ---
 
