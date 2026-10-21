@@ -8,34 +8,65 @@ Within the ASTROX ecosystem, this service operates as **Backend 2 (The Vision En
 
 ## 1. System Integration & Architecture
 
-The Vision Microservice decouples compute-intensive neural network inference from standard application business logic:
+The Vision Microservice decouples compute-intensive neural network inference from standard application business logic and uses a **decoupled dual-transport streaming pipeline** to achieve sub-second live video latency:
 
 ```mermaid
-flowchart LR
-    subgraph Capture["Sensors & Video Ingestion"]
-        CSI["CSI Camera\n(nvarguscamerasrc)"]
-        USB["USB V4L2 Device"]
-        RTSP["RTSP Stream\n(Drone Video Datalink)"]
+flowchart TD
+    subgraph Ingestion["Video Ingestion Layer"]
+        CSI["CSI Camera (nvarguscamerasrc)"]
+        USB["USB Camera (v4l2src)"]
+        RTSP["RTSP Drone Datalink (rtspsrc)"]
     end
 
-    subgraph Core["Vision Microservice (This Service :8000)"]
-        CAM["Camera Manager\n(camera/)"]
-        YOLO["YOLO Detector\n(TensorRT / CUDA)"]
-        BYTE["ByteTrack Tracker\n(Kalman Filter)"]
-        CAM --> YOLO --> BYTE
+    subgraph Core["Vision Microservice (:8000)"]
+        MGR["CameraManager (camera/manager.py)"]
+        BUF["LatestFrameBuffer (Single-Slot, Drop-Old)"]
+
+        subgraph DualPipelines["Decoupled Dual-Transport Engine"]
+            V_TRACK["WebRTC Video Track (aiortc)<br/>Raw H.264 Video (Zero Latency)"]
+            INF_WORKER["Inference Worker Thread<br/>YOLOv8/11 (TensorRT) + ByteTrack"]
+        end
+
+        REST_API["REST Media Processor<br/>(POST /detect, POST /video/detect)"]
     end
 
-    subgraph Clients["Egress & Upstream Services"]
-        GW["Application Gateway\n(Express :5000)"]
-        UI["Operator Console\n(React :3000)"]
+    subgraph Consumers["Upstream Application & Clients"]
+        GW["Application Gateway (Express :5000)"]
+        UI_VID["Operator Console: Video Player (&lt;video&gt;)"]
+        UI_CANVAS["Operator Console: Target Overlay (&lt;canvas&gt;)"]
     end
 
-    Capture --> CAM
-    GW -->|POST /detect (Media Upload)| YOLO
-    YOLO -->|Detection Coordinates| GW
-    CAM -.->|POST /webcam/webrtc/offer (WebRTC Video)| UI
-    BYTE -.->|WS /webcam/ws/detections (Target Boxes)| UI
+    CSI --> MGR
+    USB --> MGR
+    RTSP --> MGR
+    MGR --> BUF
+
+    BUF -->|"Raw Frames (Non-blocking)"| V_TRACK
+    BUF -->|"Newest Frames (Worker Queue)"| INF_WORKER
+
+    GW -->|"Media Upload (HTTP POST)"| REST_API
+    REST_API -->|"Detection JSON & Output URLs"| GW
+
+    V_TRACK -->|"WebRTC Video Stream (H.264)"| UI_VID
+    INF_WORKER -->|"WebSocket JSON (/webcam/ws/detections)"| UI_CANVAS
 ```
+
+### Architectural Subsystems:
+
+1. **Multi-Source Ingestion (`camera/`):**
+   * Encapsulates hardware-specific GStreamer pipelines for CSI sensors (`nvarguscamerasrc`), USB/V4L2 devices (`v4l2src`), and network RTSP streams (`rtspsrc`).
+   * Feeds raw frames into a thread-safe `LatestFrameBuffer` (1-slot capacity, drop-old policy). This design eliminates frame backlogs and ensures downstream consumers always receive the newest capture.
+
+2. **Decoupled Dual-Transport Live Streaming:**
+   * **Video Channel (WebRTC):** An `aiortc.VideoStreamTrack` consumes raw frames directly from `LatestFrameBuffer` and streams them as hardware-accelerated H.264 straight to the browser `<video>` element. The video path never calls the detector and never waits on inference, ensuring a continuous, fluid framerate.
+   * **Metadata Channel (WebSocket):** An independent worker thread pulls the latest frame, runs `detector.predict_frame()` (YOLO + ByteTrack), and broadcasts bounding box coordinates as JSON over `/webcam/ws/detections`. The client renders these coordinates on a synchronized `<canvas>` overlay directly over the video stream.
+
+3. **REST Media Ingestion & Batch Processing:**
+   * Synchronous `/detect` endpoint for single-frame image inspection requested by the Application Gateway.
+   * Asynchronous `/video/detect` endpoint for comprehensive frame-by-frame mission video analysis and downloadable video generation.
+
+4. **Upstream Application Gateway Integration:**
+   * The Node.js Express Gateway ([`Drone-Object-Detection-Website/backend`](https://github.com/Mahavidyajp/Drone-Object-Detection-Website)) communicates with this service over HTTP loopback (`http://127.0.0.1:8000`) for media analysis and proxies user operations.
 
 ---
 
