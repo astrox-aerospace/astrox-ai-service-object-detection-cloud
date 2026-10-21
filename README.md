@@ -74,8 +74,8 @@ flowchart TD
 
 | Repository | Primary Stack | Architecture Role | Description |
 | :--- | :--- | :--- | :--- |
-| [**Drone-Object-Detection-Website-cloud**](https://github.com/Mahavidyajp/Drone-Object-Detection-Website-cloud.git) | React 19, Node.js, Express, MongoDB | Application Layer | Central gateway handling user authentication, telemetry history, and the operator dashboard. |
-| [**astrox-cloud-deploy**](https://github.com/Mahavidyajp/astrox-cloud-deploy) | Docker, Docker Compose, Nginx | Orchestration Hub | Unified cloud deployment templates, reverse proxy definitions, and multi-service networking. |
+| [**Drone-Object-Detection-Website-cloud**](https://github.com/maha-vidya/Drone-Object-Detection-Website-cloud.git) | React 19, Node.js, Express, MongoDB | Application Layer | Central gateway handling user authentication, telemetry history, and the operator dashboard. |
+| [**astrox-cloud-deploy**](https://github.com/maha-vidya/astrox-object-detection-cloud.git) | Docker, Docker Compose, Nginx | Orchestration Hub | Unified cloud deployment templates, reverse proxy definitions, and multi-service networking. |
 
 ---
 
